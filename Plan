@@ -1,0 +1,10 @@
+Key Q: how to recommend?
+
+Generally, we are supposed to recommend movies based on people's preference. Here we devide the people into two parts.
+
+
+People who havn't rated before (new users).For these people, we have no idea about their preference on movies. However, if we know some attributes of the people,for example, ages and genders,these informations can be useful.
+We may use the given data to fit models (tree ,regression..) based on people's attributes. Then we can use the models to predict new users' preference on movies and recommend these movies.
+
+People who have already rated some movies before.
+For these people we 'll mainly concentrate on their ratings on movies.
