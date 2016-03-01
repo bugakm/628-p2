@@ -38,5 +38,14 @@ ggplot(movie_user,aes(x=averating_users,y=as.numeric(users)))+geom_point()+ylab(
 ggplot(users, aes(x =factor(1), fill = factor(gender)))+geom_bar(width = 1)+ coord_polar(theta = "y")+scale_fill_discrete(guide=guide_legend(title = "Gender"))+ggtitle("The proportion of Gender")+xlab("")
 
 ggplot(users, aes(x =occupation, fill =factor(occupation)))+geom_bar()+scale_fill_discrete(guide=guide_legend(title = "Occupation"))+ggtitle("The distribution of Occupation")
+agelevel<-quantile(users$age, probs = seq(0, 1, 0.25))
+ggplot(users, aes(x =age, fill =factor(age)))+geom_bar(show.legend = F)+ggtitle("The distribution of Age")+geom_vline(xintercept=agelevel[c(2,3,4)],linetype = 2)+ theme_bw()
+
+moviematrix<-as(item[,-1],"matrix")
+moviematrix<-as(moviematrix, "realRatingMatrix")
+image(moviematrix, main = "Raw Ratings") 
+rec=Recommender(moviematrix,me3thod="POPULAR")
+as(getModel(rec)$topN,"list") 
+# Most popular rating movie types are Drama , Comedy, Thriller & Action 
 ```
 
