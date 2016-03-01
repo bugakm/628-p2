@@ -1,14 +1,17 @@
-Key Q: how to recommend?
+Key Q: How to build a trusty movie recommender system?
 
-Generally, we are supposed to recommend movies based on people's preference. Here we devide the people into two parts.
+Data sources obtained from the database of MovieLens, and are composed of three parts: users information, movies' genre and rating. 
+(For notice: users included in our data are at least rating for 20 movies.)
 
+Generally, we are supposed to recommend movies based on people's preference. Here we devide people into two parts: new users and old users.
 
-People who havn't rated before (new users).For these people, we have no idea about their preference on movies. However, if we know some attributes of the people,for example, ages and genders,these informations can be useful.
-We may use the given data to fit models (tree ,regression..) based on people's attributes. Then we can use the models to predict new users' preference on movies and recommend these movies.
+For those new users, people who have no movie records on this website, their preference on movies are unknown. 
+However, according to other users movie records and rating data, we can deduce those new users' preference from the sharing characteristics of people.
+For example, ages, genders, occupations. These information can be useful for ur analysis.
+We may use the given data to fit models (tree ,regression..) based on people's attributes. 
+Then we can make use of these models to predict new users' preference on movies and recommend these movies.
 
-People who have already rated some movies before.
-For these people we 'll mainly concentrate on their ratings on movies.
-Here we have two method.
-The first one is simple, it focus on the similarity of movies.
-
-The seecond method is divide people into different clusters. People in same cluster have similar preference on movies. We'll recommend movies based on group preference. 
+For those older users, people who have already rated some movies before, we 'll mainly concentrate on their ratings on movies.
+Here we have two methods:
+The first one is simpler, it focus on the similarity of movies.
+The second one is dividing people into different clusters. People in the same cluster might have similar preference on movies. We'll recommend movies based on group preference. 
