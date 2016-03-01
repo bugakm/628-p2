@@ -1,0 +1,42 @@
+---
+title: "628888"
+author: "Liqiang Pu"
+output: html_document
+---
+#### data clean:
+
+```{r}
+library(recommenderlab)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+#100K data source #http://files.grouplens.org/datasets/movielens/ml-100k
+movie<-read.table("http://files.grouplens.org/datasets/movielens/ml-100k/u.data")
+colnames(movie)<-c("users","items","rating","timestamp")
+users<-read.table("http://files.grouplens.org/datasets/movielens/ml-100k/u.user",sep="|")
+colnames(users)<-c("userid","age","gender","occupation","zipcode")
+item<-read.delim("http://files.grouplens.org/datasets/movielens/ml-100k/u.item",sep="|",header=F)
+item<-item[,c(-1,-3,-4,-5)]
+colnames(item)<-c("MovieName","unknown", "Action","Adventure","Animation","Children", "Comedy" ,"Crime" ,"Documentary","Drama","Fantasy","Film-Noir","Horror","Musical","Mystery","Romance","Sci-Fi","Thriller","War","Western")
+```
+
+#### Data visualization:
+
+```{r}
+movie_item<-movie %>%
+  group_by(items) %>%
+  mutate(averating_item=mean(rating)) %>%
+  ungroup %>%
+  mutate(items = reorder(items, averating_item))
+ggplot(movie_item,aes(x=averating_item,y=as.numeric(items)))+geom_point()+ylab("items")+xlab("average rating")+ggtitle("Average rating for each movie")
+movie_user<-movie %>%
+  group_by(users) %>%
+  mutate(averating_users=mean(rating)) %>%
+  ungroup %>%
+  mutate(users = reorder(users, averating_users))
+ggplot(movie_user,aes(x=averating_users,y=as.numeric(users)))+geom_point()+ylab("users")+xlab("average rating")+ggtitle("Average rating for each user")
+ggplot(users, aes(x =factor(1), fill = factor(gender)))+geom_bar(width = 1)+ coord_polar(theta = "y")+scale_fill_discrete(guide=guide_legend(title = "Gender"))+ggtitle("The proportion of Gender")+xlab("")
+
+ggplot(users, aes(x =occupation, fill =factor(occupation)))+geom_bar()+scale_fill_discrete(guide=guide_legend(title = "Occupation"))+ggtitle("The distribution of Occupation")
+```
+
