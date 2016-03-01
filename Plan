@@ -8,3 +8,7 @@ We may use the given data to fit models (tree ,regression..) based on people's a
 
 People who have already rated some movies before.
 For these people we 'll mainly concentrate on their ratings on movies.
+Here we have two method.
+The first one is simple, it focus on the similarity of movies.
+
+The seecond method is divide people into different clusters. People in same cluster have similar preference on movies. We'll recommend movies based on group preference. 
