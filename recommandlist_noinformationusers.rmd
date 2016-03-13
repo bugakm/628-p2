@@ -1,0 +1,67 @@
+#### data clean:
+
+```{r}
+library(recommenderlab)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+#100K data source #http://files.grouplens.org/datasets/movielens/ml-100k
+movie<-read.table("http://files.grouplens.org/datasets/movielens/ml-100k/u.data")
+colnames(movie)<-c("users","items","rating","timestamp")
+users<-read.table("http://files.grouplens.org/datasets/movielens/ml-100k/u.user",sep="|")
+colnames(users)<-c("userid","age","gender","occupation","zipcode")
+item<-read.delim("http://files.grouplens.org/datasets/movielens/ml-100k/u.item",sep="|",header=F)
+item<-item[,c(-1,-3,-4,-5)]
+colnames(item)<-c("MovieName","unknown", "Action","Adventure","Animation","Children", "Comedy" ,"Crime" ,"Documentary","Drama","Fantasy","Film-Noir","Horror","Musical","Mystery","Romance","Sci-Fi","Thriller","War","Western")
+```
+
+#### Data visualization1:
+
+
+```{r}
+#Different Users may use different rating standards, therefore here we subtract the median rating for each user.
+std_rate<-function(movie){ #function for std rating
+  movie_new<-movie %>%
+  group_by(users) %>%
+  mutate(median=median(as.numeric(rating))) %>%
+  mutate(std_rating=(rating-median))%>%
+  mutate(averating_user=mean(std_rating)) %>%
+  ungroup() %>%
+  mutate(users = reorder(users, averating_user))%>% 
+  group_by(items) %>% 
+  mutate(averating_item=mean(std_rating)) %>%
+  ungroup() %>%
+  mutate(items = reorder(items, averating_item))
+}
+movie_new<-std_rate(movie)
+
+ggplot(movie_new,aes(x=averating_item,y=as.numeric(items)))+geom_point()+ylab("items")+xlab("average rating")+ggtitle("Average rating for each movie")+ theme_bw()
+ggplot(movie_new,aes(x=averating_user,y=as.numeric(users)))+geom_point()+ylab("users")+xlab("average rating")+ggtitle("Average rating for each user")+ theme_bw()
+
+#### Recommanding movie for no information users: 
+
+# we want to recommand 10 movies with highest ratings for these users, and we require that movie should be rated at lest for 95 times (since it should be popular, and here there are 943 users , we assume popular as 10% users have rated ).Here the recommand list is unique.
+rec<-10 # number of recommanding movies 
+n<-943 #users
+rec_list<-function(movie_new,n,rec){
+ id_unique<-movie_new%>% 
+group_by(items) %>% 
+mutate(times=length(users)) %>% 
+filter(times>n/10)%>% 
+summarise(rating=mean(averating_item))%>% 
+ungroup()%>% 
+arrange(items,rating)
+id<-as.numeric(as.character(tail(id_unique,rec)$items))
+return(item[id,]$MovieName)
+}
+rec_list(movie_new,n,rec)#recommand 10 movies
+# [1] Godfather, The (1972)            Titanic (1997)                  
+# [3] Star Wars (1977)                 Usual Suspects, The (1995)      
+# [5] Good Will Hunting (1997)         Casablanca (1942)               
+# [7] Shawshank Redemption, The (1994) Schindler's List (1993)         
+# [9] Wrong Trousers, The (1993)       Close Shave, A (1995)    
+rec_list(movie_new,n,5) #recommand 5 movies
+# [1] Casablanca (1942)                Shawshank Redemption, The (1994)
+# [3] Schindler's List (1993)          Wrong Trousers, The (1993)      
+# [5] Close Shave, A (1995)  
+```
