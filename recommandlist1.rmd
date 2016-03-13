@@ -1,3 +1,8 @@
+---
+title: "628888"
+author: "Liqiang Pu"
+output: html_document
+---
 #### data clean:
 
 ```{r}
@@ -15,7 +20,7 @@ item<-item[,c(-1,-3,-4,-5)]
 colnames(item)<-c("MovieName","unknown", "Action","Adventure","Animation","Children", "Comedy" ,"Crime" ,"Documentary","Drama","Fantasy","Film-Noir","Horror","Musical","Mystery","Romance","Sci-Fi","Thriller","War","Western")
 ```
 
-#### Data visualization1:
+#### No information users :
 
 
 ```{r}
@@ -38,11 +43,10 @@ movie_new<-std_rate(movie)
 ggplot(movie_new,aes(x=averating_item,y=as.numeric(items)))+geom_point()+ylab("items")+xlab("average rating")+ggtitle("Average rating for each movie")+ theme_bw()
 ggplot(movie_new,aes(x=averating_user,y=as.numeric(users)))+geom_point()+ylab("users")+xlab("average rating")+ggtitle("Average rating for each user")+ theme_bw()
 
-#### Recommanding movie for no information users: 
+#### Recommanding movies for no information users: 
 
 # we want to recommand 10 movies with highest ratings for these users, and we require that movie should be rated at lest for 95 times (since it should be popular, and here there are 943 users , we assume popular as 10% users have rated ).Here the recommand list is unique.
-rec<-10 # number of recommanding movies 
-n<-943 #users
+n<-943 # # of users
 rec_list<-function(movie_new,n,rec){
  id_unique<-movie_new%>% 
 group_by(items) %>% 
@@ -54,14 +58,50 @@ arrange(items,rating)
 id<-as.numeric(as.character(tail(id_unique,rec)$items))
 return(item[id,]$MovieName)
 }
-rec_list(movie_new,n,rec)#recommand 10 movies
+rec_list(movie_new,n,10)#recommand 10 movies
 # [1] Godfather, The (1972)            Titanic (1997)                  
 # [3] Star Wars (1977)                 Usual Suspects, The (1995)      
 # [5] Good Will Hunting (1997)         Casablanca (1942)               
 # [7] Shawshank Redemption, The (1994) Schindler's List (1993)         
 # [9] Wrong Trousers, The (1993)       Close Shave, A (1995)    
-rec_list(movie_new,n,5) #recommand 5 movies
+
+
+```
+
+#### Users with personal information:
+```{r}
+#users data visualization
+ggplot(users, aes(x =factor(1), fill = factor(gender)))+geom_bar(width = 1)+ coord_polar(theta = "y")+scale_fill_discrete(guide=guide_legend(title = "Gender"))+ggtitle("The proportion of Gender")+xlab("")+ theme_bw()
+ggplot(users, aes(x =occupation, fill =factor(occupation)))+geom_bar()+scale_fill_discrete(guide=guide_legend(title = "Occupation"))+ggtitle("The distribution of Occupation")+ theme_bw()
+agelevel<-quantile(users$age, probs = seq(0, 1, 0.25))
+ggplot(users, aes(x =age, fill =factor(age)))+geom_bar(show.legend = F)+ggtitle("The distribution of Age")+geom_vline(xintercept=agelevel[c(2,3,4)],linetype = 2)+ theme_bw()
+
+
+# randomly select 1 user from the user dataset (assume we only have these information):
+#### Recommanding movies for   users with personal informations: 
+x<- 150 # an example
+user_infor<-users[x,]
+age<-user_infor$age # age information for this user
+sex<-user_infor$gender # gender information for this user
+rec_list1<-function(age,sex,movie_new,users,rec){
+  agelevel<-quantile(users$age, probs = seq(0, 1, 0.25))
+  checkinter<-data.frame(L=agelevel[1:4],H=agelevel[2:5])
+checkinter$Int<-cbind( checkinter[,1] <=age & checkinter[,2] >= age )
+agebond<-checkinter[checkinter$Int==TRUE,1:2]
+users_new<-users %>%
+filter(age>=agebond[1,1] & age<=agebond[1,2]) %>%
+filter(gender==sex)
+n<-dim(users_new)[1]
+movie_new1<-movie_new %>%
+filter(users %in% users_new$userid)
+return(rec_list(movie_new1,n,rec))
+}
+rec_list1(age,sex,movie_new,users,5)  # If we know user's age and gender.
+# [1] Good Will Hunting (1997)         Casablanca (1942)               
+# [3] Shawshank Redemption, The (1994) Schindler's List (1993)         
+# [5] Wrong Trousers, The (1993)      
+rec_list(movie_new,n,5) # If we don't know the age and gender or they are out of range.
 # [1] Casablanca (1942)                Shawshank Redemption, The (1994)
 # [3] Schindler's List (1993)          Wrong Trousers, The (1993)      
-# [5] Close Shave, A (1995)  
+# [5] Close Shave, A (1995) 
 ```
